@@ -31,6 +31,15 @@ class NeuralNetworkPredictor:
             self.scaler = joblib.load(models_dir / 'scaler_nn.pkl')
             self.feature_names = joblib.load(models_dir / 'feature_names_nn.pkl')
             
+            # Load additional metadata (if available)
+            try:
+                self.metrics = joblib.load(models_dir / 'nn_metrics.pkl')
+                self.feature_importance = joblib.load(models_dir / 'nn_feature_importance.pkl')
+            except Exception:
+                print("Warning: Could not load metrics or feature importance")
+                self.metrics = {'final_score_rmse': 5.0} # Default fallback
+                self.feature_importance = {}
+
             self.models_loaded = True
             print("✓ Neural network models loaded successfully")
             
@@ -38,7 +47,7 @@ class NeuralNetworkPredictor:
             print(f"Warning: Could not load neural network models: {e}")
             self.models_loaded = False
             raise
-    
+
     def engineer_features(self, df):
         """Create engineered features from raw data."""
         df = df.copy()
@@ -90,7 +99,7 @@ class NeuralNetworkPredictor:
         X_scaled = self.scaler.transform(X)
         
         return X_scaled
-    
+
     def predict(self, student_data):
         """
         Make predictions using neural network models.
@@ -125,6 +134,10 @@ class NeuralNetworkPredictor:
         pass_confidence = max(pass_fail_proba) * 100
         support_confidence = max(support_proba) * 100
         
+        # Calculate regression confidence interval (95% roughly +/- 2*RMSE)
+        rmse = self.metrics.get('final_score_rmse', 5.0)
+        confidence_interval_val = 2.0 * rmse
+        
         # Prepare results
         results = {
             'pass_fail': {
@@ -135,7 +148,10 @@ class NeuralNetworkPredictor:
             },
             'final_exam_score': {
                 'predicted_score': round(final_score_pred, 2),
-                'grade': self._get_grade(final_score_pred)
+                'grade': self._get_grade(final_score_pred),
+                'confidence_interval': round(confidence_interval_val, 2),
+                'min_score': round(max(0, final_score_pred - confidence_interval_val), 2),
+                'max_score': round(min(100, final_score_pred + confidence_interval_val), 2)
             },
             'support_needed': {
                 'prediction': 'Yes' if support_pred == 1 else 'No',
@@ -146,6 +162,7 @@ class NeuralNetworkPredictor:
                 pass_fail_pred, final_score_pred, support_pred
             ),
             'features_used': feature_values,
+            'feature_importance': self.feature_importance,
             'num_features': len(self.feature_names)
         }
         

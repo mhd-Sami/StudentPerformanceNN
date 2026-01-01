@@ -12,5 +12,22 @@
     "assignment3_total": 100,
     "assignment4_total": 100,
     "midterm_total": 100
+  },
+  "ai202": {
+    "id": "ai202",
+    "name": "AI202",
+    "description": "Intro to Aritificial Intelligence",
+    "num_quizzes": 3,
+    "num_assignments": 2,
+    "has_midterm": false,
+    "quiz1_total": 30,
+    "quiz2_total": 25,
+    "quiz3_total": 20,
+    "quiz4_total": 100,
+    "assignment1_total": 15,
+    "assignment2_total": 25,
+    "assignment3_total": 100,
+    "assignment4_total": 100,
+    "midterm_total": 100
   }
 }

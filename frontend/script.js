@@ -47,10 +47,12 @@ form.addEventListener('submit', async (e) => {
         if (!response.ok) {
             throw new Error(data.message || 'Prediction failed');
         }
-
-        // Display results
-        displayResults(data.predictions);
-
+        if (data.success) {
+            // Display results
+            displayResults(data.predictions, data.comparison, data.debug_info);
+        } else {
+            showError(data.error || 'An error occurred during prediction.');
+        }
     } catch (error) {
         console.error('Error:', error);
         showError(error.message);
@@ -81,6 +83,7 @@ function collectFormData() {
     // Add selected model type
     if (modelSelect) {
         data.model_type = modelSelect.value;
+        console.log("Sending model_type:", data.model_type);
     }
 
     return data;
@@ -89,7 +92,14 @@ function collectFormData() {
 /**
  * Display prediction results
  */
-function displayResults(predictions) {
+function displayResults(predictions, comparison = null, debugInfo = []) {
+    console.log("Received comparison data:", comparison);
+    if (debugInfo && debugInfo.length > 0) {
+        console.log("-------------- BACKEND DEBUG INFO --------------");
+        debugInfo.forEach(msg => console.log(msg));
+        console.log("------------------------------------------------");
+    }
+
     // Pass/Fail
     const passFail = predictions.pass_fail;
     document.getElementById('pass-fail-value').textContent = passFail.prediction;
@@ -101,8 +111,16 @@ function displayResults(predictions) {
     passFallCard.classList.add(passFail.prediction === 'Pass' ? 'pass' : 'fail');
 
     // Final Score
+    // Final Score
     const finalExam = predictions.final_exam_score;
-    document.getElementById('final-score-value').textContent = finalExam.predicted_score;
+
+    // Display score with confidence interval if available
+    let scoreDisplay = finalExam.predicted_score;
+    if (finalExam.confidence_interval > 0) {
+        scoreDisplay += ` <span style="font-size: 0.6em; color: var(--gray-500);">(±${finalExam.confidence_interval})</span>`;
+    }
+
+    document.getElementById('final-score-value').innerHTML = scoreDisplay;
     document.getElementById('final-grade').textContent = finalExam.grade;
 
     // Support
@@ -117,12 +135,50 @@ function displayResults(predictions) {
     // Overall Assessment
     document.getElementById('overall-assessment').textContent = predictions.overall_assessment;
 
+    // Model Comparison (if available)
+    const comparisonContainer = document.getElementById('comparison-container');
+    try {
+        if (comparison && comparisonContainer) {
+            console.log("Attempting to render comparison card...", comparison);
+            comparisonContainer.style.display = 'block';
+            comparisonContainer.style.marginBottom = '20px'; // Force spacing
+            console.log("Set display to block");
+
+            const agreement = comparison.agreement;
+            const color = agreement ? 'var(--success-600)' : 'var(--warning-600)';
+            const icon = agreement ? '✓' : '⚠️';
+
+            comparisonContainer.innerHTML = `
+                <div style="background: var(--white); border-radius: var(--radius-md); padding: var(--space-4); border: 2px solid ${agreement ? 'var(--success-100)' : 'var(--warning-100)'}; box-shadow: var(--shadow-sm);">
+                    <h4 style="margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--gray-600);">Model Consensus</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <span style="font-weight: 600; color: ${color}; display: flex; align-items: center; gap: 0.5rem;">
+                                ${icon} ${agreement ? 'Models Agree' : 'Models Diverge'}
+                            </span>
+                            <div style="font-size: 0.85rem; color: var(--gray-500); margin-top: 0.25rem;">
+                                ${comparison.other_model_name} predicts: <strong>${comparison.other_pass_fail}</strong> (${comparison.other_score.toFixed(1)})
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            console.log("Rendered comparison HTML");
+        } else if (comparisonContainer) {
+            console.log("Hiding comparison container (no data or container missing)");
+            comparisonContainer.style.display = 'none';
+        }
+    } catch (e) {
+        console.error("CRITICAL ERROR Rendering Comparison Card:", e);
+    }
+
     // Recommendation
     document.getElementById('recommendation').textContent = support.recommendation;
 
     // Features (if available)
+    // Features (if available)
     if (predictions.features_used && predictions.num_features) {
-        displayFeatures(predictions.features_used, predictions.num_features);
+        displayFeatures(predictions.features_used, predictions.num_features, predictions.feature_importance);
     }
 
     // Show results section
@@ -132,7 +188,7 @@ function displayResults(predictions) {
 /**
  * Display features used by the model
  */
-function displayFeatures(features, numFeatures) {
+function displayFeatures(features, numFeatures, featureImportance = {}) {
     const featuresGrid = document.getElementById('features-grid');
     const featureCount = document.getElementById('feature-count');
     const modelNameDisplay = document.getElementById('model-name-display');
@@ -148,15 +204,36 @@ function displayFeatures(features, numFeatures) {
         modelNameDisplay.textContent = selectedOption.text;
     }
 
+    // Convert to array for sorting
+    let featureEntries = Object.entries(features);
+
+    // Sort by importance if available
+    if (featureImportance && Object.keys(featureImportance).length > 0) {
+        featureEntries.sort((a, b) => {
+            const impA = featureImportance[a[0]] || 0;
+            const impB = featureImportance[b[0]] || 0;
+            return impB - impA; // Descending order
+        });
+    }
+
     // Create feature cards
-    const featureCards = Object.entries(features).map(([key, value]) => {
+    const featureCards = featureEntries.map(([key, value]) => {
         const displayName = formatFeatureName(key);
         const displayValue = typeof value === 'number' ? value.toFixed(2) : value;
+        const importance = featureImportance ? (featureImportance[key] || 0) : 0;
+
+        let importanceIndicator = '';
+        if (importance > 0.05) { // Highlight important features
+            importanceIndicator = `<div style="height: 4px; background: var(--primary-500); width: ${Math.min(importance * 500, 100)}%; border-radius: 2px; margin-top: 4px;"></div>`;
+        }
 
         return `
-            <div class="feature-item">
-                <span class="feature-name">${displayName}</span>
-                <span class="feature-value">${displayValue}</span>
+            <div class="feature-item" style="flex-direction: column; align-items: stretch; gap: 4px;" title="Importance: ${(importance * 100).toFixed(1)}%">
+                <div style="display: flex; justify-content: space-between; width: 100%;">
+                    <span class="feature-name">${displayName}</span>
+                    <span class="feature-value">${displayValue}</span>
+                </div>
+                ${importanceIndicator}
             </div>
         `;
     }).join('');

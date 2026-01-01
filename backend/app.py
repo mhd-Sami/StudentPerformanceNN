@@ -133,11 +133,53 @@ def predict():
         # Make prediction
         predictions = selected_predictor.predict(sanitized_data)
         
+        # Model Comparison Logic
+        comparison = None
+        debug_info = []
+        try:
+            debug_info.append(f"Model Type: {model_type}")
+            debug_info.append(f"RF Predictor exists: {predictor is not None}")
+            debug_info.append(f"NN Predictor exists: {nn_predictor is not None}")
+            
+            if model_type == 'neural_network' and predictor is not None:
+                # Compare with Random Forest
+                debug_info.append("Entering NN vs RF comparison")
+                rf_preds = predictor.predict(sanitized_data)
+                comparison = {
+                    'other_model_name': 'Random Forest',
+                    'other_score': float(rf_preds['final_exam_score']['predicted_score']),
+                    'other_pass_fail': rf_preds['pass_fail']['prediction'],
+                    'agreement': bool(predictions['pass_fail']['prediction'] == rf_preds['pass_fail']['prediction'])
+                }
+            elif (model_type == 'random_forest' or model_type is None) and nn_predictor is not None:
+                # Compare with Neural Network
+                debug_info.append("Entering RF vs NN comparison")
+                nn_preds = nn_predictor.predict(sanitized_data)
+                comparison = {
+                    'other_model_name': 'Neural Network',
+                    'other_score': float(nn_preds['final_exam_score']['predicted_score']),
+                    'other_pass_fail': nn_preds['pass_fail']['prediction'],
+                    'agreement': bool(predictions['pass_fail']['prediction'] == nn_preds['pass_fail']['prediction'])
+                }
+            else:
+                 debug_info.append("No matching condition for comparison")
+                 
+            debug_info.append(f"Comparison Result: {comparison}")
+            
+        except Exception as e:
+            error_msg = f"Comparison failed: {str(e)}"
+            print(error_msg)
+            debug_info.append(error_msg)
+            import traceback
+            traceback.print_exc()
+        
         # Return results
         response = {
             'success': True,
             'predictions': predictions,
-            'normalized_scores': sanitized_data
+            'comparison': comparison,
+            'normalized_scores': sanitized_data,
+            'debug_info': debug_info
         }
         
         # Include original marks and subject info if custom subject

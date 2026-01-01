@@ -236,40 +236,93 @@ def main():
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
     
-    # Split data
+    # Split data for final training
     print("\nSplitting data (80% train, 20% test)...")
     X_train, X_test = train_test_split(X_scaled, test_size=0.2, random_state=42)
     
     # Prepare targets
-    y_pass_fail_train, y_pass_fail_test = train_test_split(
-        df_engineered['pass_fail'].values, test_size=0.2, random_state=42
-    )
-    y_final_train, y_final_test = train_test_split(
-        df_engineered['final_exam'].values, test_size=0.2, random_state=42
-    )
-    y_support_train, y_support_test = train_test_split(
-        df_engineered['needs_support'].values, test_size=0.2, random_state=42
-    )
+    y_pass_fail = df_engineered['pass_fail'].values
+    y_final = df_engineered['final_exam'].values
+    y_support = df_engineered['needs_support'].values
+    
+    y_pass_fail_train, y_pass_fail_test = train_test_split(y_pass_fail, test_size=0.2, random_state=42)
+    y_final_train, y_final_test = train_test_split(y_final, test_size=0.2, random_state=42)
+    y_support_train, y_support_test = train_test_split(y_support, test_size=0.2, random_state=42)
     
     # Train models
     models = {}
+    model_metrics = {}
+    
+    # --- 1. Pass/Fail Classifier ---
+    print("\n" + "="*60)
+    print("1. Pass/Fail Classifier")
+    print("="*60)
+    
+    # Cross-Validation
+    from sklearn.model_selection import cross_val_score
+    pf_model_cv = MLPClassifier(hidden_layer_sizes=(64, 32, 16), max_iter=200, random_state=42)
+    cv_scores = cross_val_score(pf_model_cv, X_scaled, y_pass_fail, cv=5, scoring='accuracy')
+    print(f"Cross-Validation Accuracy: {cv_scores.mean()*100:.2f}% (+/- {cv_scores.std()*100:.2f}%)")
     
     models['pass_fail'] = train_pass_fail_model(
         X_train, X_test, y_pass_fail_train, y_pass_fail_test
     )
     
+    # Feature Importance (Permutation)
+    from sklearn.inspection import permutation_importance
+    print("Calculating feature importance...")
+    pf_perm_importance = permutation_importance(models['pass_fail'], X_test, y_pass_fail_test, n_repeats=10, random_state=42)
+    
+    # --- 2. Final Score Predictor ---
+    print("\n" + "="*60)
+    print("2. Final Exam Score Predictor")
+    print("="*60)
+    
+    # Cross-Validation
+    fs_model_cv = MLPRegressor(hidden_layer_sizes=(64, 32, 16), max_iter=200, random_state=42)
+    cv_scores_rmse = cross_val_score(fs_model_cv, X_scaled, y_final, cv=5, scoring='neg_root_mean_squared_error')
+    print(f"Cross-Validation RMSE: {-cv_scores_rmse.mean():.2f} (+/- {cv_scores_rmse.std():.2f})")
+    
+    # Store RMSE for confidence intervals
+    model_metrics['final_score_rmse'] = -cv_scores_rmse.mean()
+    
     models['final_score'] = train_final_score_model(
         X_train, X_test, y_final_train, y_final_test
     )
     
+    # Feature Importance (Permutation)
+    print("Calculating feature importance...")
+    fs_perm_importance = permutation_importance(models['final_score'], X_test, y_final_test, n_repeats=10, random_state=42)
+
+    # --- 3. Support Need Classifier ---
+    print("\n" + "="*60)
+    print("3. Support Need Classifier")
+    print("="*60)
+    
+    # Cross-Validation
+    sn_model_cv = MLPClassifier(hidden_layer_sizes=(64, 32, 16), max_iter=200, random_state=42)
+    cv_scores = cross_val_score(sn_model_cv, X_scaled, y_support, cv=5, scoring='accuracy')
+    print(f"Cross-Validation Accuracy: {cv_scores.mean()*100:.2f}% (+/- {cv_scores.std()*100:.2f}%)")
+    
     models['support'] = train_support_model(
         X_train, X_test, y_support_train, y_support_test
     )
-    
-    # Save models
+
+    # Save models and metadata
     save_models(models, scaler, feature_names)
     
-    print("\n✓ Training Complete!")
+    # Save extra metadata for UI
+    models_dir = Path(__file__).parent / 'saved_models'
+    
+    # Save metrics
+    joblib.dump(model_metrics, models_dir / 'nn_metrics.pkl')
+    
+    # Save Feature Importance (averaged across models or just use Final Score importance as representative)
+    # We'll save the Final Score importance as it's most granular
+    feature_importance_dict = dict(zip(feature_names, fs_perm_importance.importances_mean))
+    joblib.dump(feature_importance_dict, models_dir / 'nn_feature_importance.pkl')
+    
+    print("\n✓ Training Complete! Saved models, metrics, and feature importance.")
 
 if __name__ == "__main__":
     main()

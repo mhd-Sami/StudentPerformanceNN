@@ -17,23 +17,74 @@ def load_data():
     df = pd.read_csv(data_path)
     return df
 
+def engineer_features(df):
+    """Create engineered features from raw data (Same as NN)."""
+    df = df.copy()
+    
+    # Average scores
+    df['quiz_avg'] = df[['quiz1', 'quiz2', 'quiz3', 'quiz4']].mean(axis=1)
+    df['assignment_avg'] = df[['assignment1', 'assignment2', 'assignment3', 'assignment4']].mean(axis=1)
+    
+    # Overall average
+    df['overall_avg'] = df[['quiz_avg', 'assignment_avg', 'midterm']].mean(axis=1)
+    
+    # Performance trends
+    df['quiz_trend'] = df['quiz4'] - df['quiz1']
+    df['assignment_trend'] = df['assignment4'] - df['assignment1']
+    
+    # Consistency
+    df['quiz_std'] = df[['quiz1', 'quiz2', 'quiz3', 'quiz4']].std(axis=1)
+    df['assignment_std'] = df[['assignment1', 'assignment2', 'assignment3', 'assignment4']].std(axis=1)
+    
+    # Attendance impact
+    df['attendance_score_interaction'] = df['attendance'] * df['overall_avg'] / 100
+    
+    # Performance categories
+    df['high_performer'] = (df['overall_avg'] >= 80).astype(int)
+    df['low_performer'] = (df['overall_avg'] < 60).astype(int)
+    
+    return df
+
+from sklearn.preprocessing import StandardScaler
+
 def prepare_features(df):
     """
-    Prepare feature matrix from dataframe.
+    Prepare feature matrix from dataframe with engineering and scaling.
     
     Args:
         df: DataFrame with student data
         
     Returns:
-        Feature matrix (X)
+        Feature matrix (X), feature names, and scaler
     """
-    feature_columns = [
+    # 1. Base features
+    base_features = [
         'attendance', 'quiz1', 'quiz2', 'quiz3', 'quiz4',
         'assignment1', 'assignment2', 'assignment3', 'assignment4', 'midterm'
     ]
     
-    X = df[feature_columns].values
-    return X, feature_columns
+    # 2. Engineer features
+    df_engineered = engineer_features(df)
+    
+    # 3. Define all feature names (20 features)
+    feature_columns = base_features + [
+        'quiz_avg', 'assignment_avg', 'overall_avg',
+        'quiz_trend', 'assignment_trend',
+        'quiz_std', 'assignment_std',
+        'attendance_score_interaction',
+        'high_performer', 'low_performer'
+    ]
+    
+    # 4. Handle NaNs
+    df_engineered = df_engineered.fillna(0)
+    
+    X = df_engineered[feature_columns].values
+    
+    # 5. Scale features (CRITICAL for matching NN performance)
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+    
+    return X_scaled, feature_columns, scaler
 
 def train_pass_fail_model(X_train, X_test, y_train, y_test):
     """Train Random Forest classifier for pass/fail prediction."""
@@ -138,23 +189,22 @@ def main():
     print("\nLoading training data...")
     df = load_data()
     print(f"✓ Loaded {len(df)} records")
-    
-    # Prepare features
-    X, feature_names = prepare_features(df)
+    # Prepare features (with scaling)
+    print("\nPreparing and scaling features...")
+    X, feature_columns, scaler = prepare_features(df)
     
     # Split data
-    print("\nSplitting data (80% train, 20% test)...")
-    X_train, X_test = train_test_split(X, test_size=0.2, random_state=42)
+    print("Splitting data (80% train, 20% test)...")
+    X_train, X_test, y_pass_fail_train, y_pass_fail_test = train_test_split(
+        X, df['pass_fail'], test_size=0.2, random_state=42
+    )
     
-    # Prepare target variables
-    y_pass_fail_train, y_pass_fail_test = train_test_split(
-        df['pass_fail'].values, test_size=0.2, random_state=42
+    _, _, y_final_train, y_final_test = train_test_split(
+        X, df['final_exam'], test_size=0.2, random_state=42
     )
-    y_final_train, y_final_test = train_test_split(
-        df['final_exam'].values, test_size=0.2, random_state=42
-    )
-    y_support_train, y_support_test = train_test_split(
-        df['needs_support'].values, test_size=0.2, random_state=42
+    
+    _, _, y_support_train, y_support_test = train_test_split(
+        X, df['needs_support'], test_size=0.2, random_state=42
     )
     
     # Train models
@@ -173,7 +223,15 @@ def main():
     )
     
     # Save models
-    save_models(models, feature_names)
+    print("\nSaving models and scaler...")
+    models_dir = Path(__file__).parent / 'saved_models'
+    models_dir.mkdir(exist_ok=True)
+    
+    joblib.dump(models['pass_fail'], models_dir / 'pass_fail_model.pkl')
+    joblib.dump(models['final_score'], models_dir / 'final_score_model.pkl')
+    joblib.dump(models['support'], models_dir / 'support_model.pkl')
+    joblib.dump(feature_columns, models_dir / 'feature_names.pkl')
+    joblib.dump(scaler, models_dir / 'scaler_rf.pkl') # Save RF scaler
     
     print("\n✓ Training Complete!")
 
