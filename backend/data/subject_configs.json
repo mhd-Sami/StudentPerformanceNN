@@ -29,5 +29,22 @@
     "assignment3_total": 100,
     "assignment4_total": 100,
     "midterm_total": 100
+  },
+  "mathematics-101": {
+    "id": "mathematics-101",
+    "name": "Mathematics 101",
+    "num_quizzes": 2,
+    "num_assignments": 3,
+    "has_midterm": true,
+    "quiz1_total": 50,
+    "quiz2_total": 75,
+    "quiz3_total": 100,
+    "quiz4_total": 100,
+    "assignment1_total": 30,
+    "assignment2_total": 50,
+    "assignment3_total": 100,
+    "assignment4_total": 100,
+    "midterm_total": 45,
+    "description": "Custom configuration for Mathematics 101"
   }
 }
