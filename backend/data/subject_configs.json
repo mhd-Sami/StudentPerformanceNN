@@ -1,0 +1,16 @@
+{
+  "default": {
+    "id": "default",
+    "name": "Default (Out of 100)",
+    "description": "All assessments are out of 100 marks",
+    "quiz1_total": 100,
+    "quiz2_total": 100,
+    "quiz3_total": 100,
+    "quiz4_total": 100,
+    "assignment1_total": 100,
+    "assignment2_total": 100,
+    "assignment3_total": 100,
+    "assignment4_total": 100,
+    "midterm_total": 100
+  }
+}

@@ -1,0 +1,25 @@
+# Quick fix for None value handling in subject_config.py
+# Replace lines 225-235 in fill_missing_with_average function
+
+# OLD CODE:
+#         for field in all_fields:
+#             if field in obtained_marks:
+#                 complete_data[field] = obtained_marks[field]
+#             elif field == 'attendance':
+#                 # If attendance missing, use 100 (assume full attendance)
+#                 complete_data[field] = obtained_marks.get('attendance', 100.0)
+#             else:
+#                 # Fill with average
+#                 complete_data[field] = average_score
+
+# NEW CODE (with None handling):
+        for field in all_fields:
+            value = obtained_marks.get(field)
+            if value is not None:
+                complete_data[field] = value
+            elif field == 'attendance':
+                # If attendance missing or None, use 100 (assume full attendance)
+                complete_data[field] = 100.0
+            else:
+                # Fill with average
+                complete_data[field] = average_score

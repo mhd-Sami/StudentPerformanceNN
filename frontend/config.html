@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subject Configuration | Performance Analytics Platform</title>
+    <meta name="description" content="Configure custom subject assessment structures">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="icon-styles.css">
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon"></div>
+                <div class="brand-text">
+                    <span class="brand-name">Performance Analytics</span>
+                    <span class="brand-subtitle">AI-Powered Platform</span>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">
+                    <span class="nav-icon icon-chart"></span>
+                    <span>Predictions</span>
+                </a>
+                <a href="config.html" class="nav-link active">
+                    <span class="nav-icon icon-settings"></span>
+                    <span>Configuration</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Quick Actions</h3>
+                <button class="sidebar-btn"
+                    onclick="document.getElementById('config-form').scrollIntoView({behavior: 'smooth'})">
+                    <span class="sidebar-btn-icon icon-plus"></span>
+                    <span>New Configuration</span>
+                </button>
+                <button class="sidebar-btn" onclick="window.location.href='index.html'">
+                    <span class="sidebar-btn-icon icon-arrow-left"></span>
+                    <span>Back to Predictions</span>
+                </button>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Help</h3>
+                <p class="sidebar-help">Create custom subject configurations to match your grading structure. Specify
+                    total marks for each assessment component.</p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Hero Section -->
+            <section class="hero">
+                <div class="hero-content">
+                    <h1 class="hero-title">Subject Configuration</h1>
+                    <p class="hero-subtitle">Define custom assessment structures for different subjects with flexible
+                        total marks and dynamic assessment counts</p>
+                </div>
+            </section>
+
+            <!-- Create Configuration Form -->
+            <section class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Create New Configuration</h2>
+                    <p class="section-description">Set up a custom subject with specific total marks for each assessment
+                        component</p>
+                </div>
+
+                <form id="config-form" class="prediction-form">
+                    <!-- Basic Information -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3 class="form-card-title">Basic Information</h3>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="form-group">
+                                <label for="subject-name" class="form-label">
+                                    Subject Name
+                                </label>
+                                <input type="text" id="subject-name" name="subject-name" class="form-input"
+                                    placeholder="e.g., Mathematics 101" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="subject-description" class="form-label">
+                                    Description (Optional)
+                                </label>
+                                <input type="text" id="subject-description" name="subject-description"
+                                    class="form-input" placeholder="Brief description of the subject">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Assessment Counts -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3 class="form-card-title">Assessment Structure</h3>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="num-quizzes" class="form-label">Number of Quizzes Conducted</label>
+                                    <select id="num-quizzes" name="num-quizzes" class="form-input">
+                                        <option value="1">1 Quiz</option>
+                                        <option value="2">2 Quizzes</option>
+                                        <option value="3">3 Quizzes</option>
+                                        <option value="4" selected>4 Quizzes</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="num-assignments" class="form-label">Number of Assignments
+                                        Conducted</label>
+                                    <select id="num-assignments" name="num-assignments" class="form-input">
+                                        <option value="1">1 Assignment</option>
+                                        <option value="2">2 Assignments</option>
+                                        <option value="3">3 Assignments</option>
+                                        <option value="4" selected>4 Assignments</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="has-midterm" class="form-label">Has Midterm Been Conducted?</label>
+                                    <select id="has-midterm" name="has-midterm" class="form-input">
+                                        <option value="true" selected>Yes</option>
+                                        <option value="false">No</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quiz Totals -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3 class="form-card-title">Quiz Total Marks</h3>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="form-grid">
+                                <div class="form-group" id="quiz1-total-group">
+                                    <label for="quiz1-total" class="form-label">Quiz 1 Total</label>
+                                    <input type="number" id="quiz1-total" name="quiz1-total" class="form-input" min="1"
+                                        value="100" required>
+                                </div>
+                                <div class="form-group" id="quiz2-total-group">
+                                    <label for="quiz2-total" class="form-label">Quiz 2 Total</label>
+                                    <input type="number" id="quiz2-total" name="quiz2-total" class="form-input" min="1"
+                                        value="100" required>
+                                </div>
+                                <div class="form-group" id="quiz3-total-group">
+                                    <label for="quiz3-total" class="form-label">Quiz 3 Total</label>
+                                    <input type="number" id="quiz3-total" name="quiz3-total" class="form-input" min="1"
+                                        value="100" required>
+                                </div>
+                                <div class="form-group" id="quiz4-total-group">
+                                    <label for="quiz4-total" class="form-label">Quiz 4 Total</label>
+                                    <input type="number" id="quiz4-total" name="quiz4-total" class="form-input" min="1"
+                                        value="100" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Assignment Totals -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3 class="form-card-title">Assignment Total Marks</h3>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="form-grid">
+                                <div class="form-group" id="assignment1-total-group">
+                                    <label for="assignment1-total" class="form-label">Assignment 1 Total</label>
+                                    <input type="number" id="assignment1-total" name="assignment1-total"
+                                        class="form-input" min="1" value="100" required>
+                                </div>
+                                <div class="form-group" id="assignment2-total-group">
+                                    <label for="assignment2-total" class="form-label">Assignment 2 Total</label>
+                                    <input type="number" id="assignment2-total" name="assignment2-total"
+                                        class="form-input" min="1" value="100" required>
+                                </div>
+                                <div class="form-group" id="assignment3-total-group">
+                                    <label for="assignment3-total" class="form-label">Assignment 3 Total</label>
+                                    <input type="number" id="assignment3-total" name="assignment3-total"
+                                        class="form-input" min="1" value="100" required>
+                                </div>
+                                <div class="form-group" id="assignment4-total-group">
+                                    <label for="assignment4-total" class="form-label">Assignment 4 Total</label>
+                                    <input type="number" id="assignment4-total" name="assignment4-total"
+                                        class="form-input" min="1" value="100" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Midterm Total -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3 class="form-card-title">Midterm Examination</h3>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="form-group">
+                                <label for="midterm-total" class="form-label">
+                                    Midterm Total Marks
+                                </label>
+                                <input type="number" id="midterm-total" name="midterm-total" class="form-input" min="1"
+                                    value="100" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="submit-btn" id="save-config-btn">
+                        <span class="btn-icon icon-save"></span>
+                        <span class="btn-text">Save Configuration</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Existing Configurations -->
+            <section class="section" id="configs-section">
+                <div class="section-header">
+                    <h2 class="section-title">Existing Configurations</h2>
+                    <p class="section-description">Manage your saved subject configurations</p>
+                </div>
+
+                <div id="configs-list" class="configs-list">
+                    <p class="loading-message">Loading configurations...</p>
+                </div>
+            </section>
+
+            <!-- Success/Error Messages -->
+            <section class="section" id="success-section" style="display: none;">
+                <div class="success-card">
+                    <div class="success-icon icon-check-circle"></div>
+                    <h3 class="success-title" id="success-title">Success</h3>
+                    <p class="success-message" id="success-message"></p>
+                </div>
+            </section>
+
+            <section class="section" id="error-section" style="display: none;">
+                <div class="error-card">
+                    <div class="error-icon icon-alert-triangle"></div>
+                    <h3 class="error-title">Error</h3>
+                    <p class="error-message" id="error-message"></p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 Student Performance Analytics Platform | Powered by Neural Networks & Deep Learning</p>
+        </div>
+    </footer>
+
+    <script src="config.js?v=4"></script>
+</body>
+
+</html>

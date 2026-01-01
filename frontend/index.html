@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance Analytics | AI-Powered Prediction Platform</title>
+    <meta name="description"
+        content="Enterprise-grade student performance prediction platform powered by deep learning">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon">📊</div>
+                <div class="brand-text">
+                    <span class="brand-name">Performance Analytics</span>
+                    <span class="brand-subtitle">AI-Powered Platform</span>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link active">
+                    <span class="nav-icon">📈</span>
+                    <span>Predictions</span>
+                </a>
+                <a href="config.html" class="nav-link">
+                    <span class="nav-icon">⚙️</span>
+                    <span>Configuration</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Quick Actions</h3>
+                <button class="sidebar-btn"
+                    onclick="document.getElementById('prediction-form').scrollIntoView({behavior: 'smooth'})">
+                    <span class="sidebar-btn-icon">🎯</span>
+                    <span>New Prediction</span>
+                </button>
+                <button class="sidebar-btn" onclick="window.location.href='config.html'">
+                    <span class="sidebar-btn-icon">➕</span>
+                    <span>Add Subject</span>
+                </button>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Model Selection</h3>
+                <div class="info-item">
+                    <span class="info-label">Active Model</span>
+                </div>
+                <select id="model-select" class="form-input" style="margin-top: 0.5rem;">
+                    <option value="random_forest">Random Forest</option>
+                </select>
+                <div class="info-item" style="margin-top: 1rem;">
+                    <span class="info-label">Status</span>
+                    <span class="info-value" id="model-status">Ready</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Hero Section -->
+            <section class="hero">
+                <div class="hero-content">
+                    <h1 class="hero-title">Student Performance Prediction</h1>
+                    <p class="hero-subtitle">Leverage advanced neural networks and 42 engineered features to predict
+                        student outcomes with 94.5% accuracy</p>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">🧠</div>
+                        <div class="stat-label">Deep Learning</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-label">42 Features</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⚡</div>
+                        <div class="stat-label">Real-time Analysis</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Prediction Form -->
+            <section class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Performance Analysis</h2>
+                    <p class="section-description">Enter student assessment data to generate AI-powered predictions</p>
+                </div>
+
+                <form id="prediction-form" class="prediction-form">
+                    <!-- Subject Selection -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3 class="form-card-title">Subject Configuration</h3>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="form-group-inline">
+                                <label for="subject-select" class="form-label">
+                                    <span class="label-icon">📚</span>
+                                    <span>Select Subject</span>
+                                </label>
+                                <select id="subject-select" name="subject-select" class="form-input">
+                                    <option value="default">Default Configuration (100 marks each)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attendance -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3 class="form-card-title">Attendance Record</h3>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="form-group-inline">
+                                <label for="attendance" class="form-label">
+                                    <span class="label-icon">📅</span>
+                                    <span>Attendance Percentage</span>
+                                </label>
+                                <input type="number" id="attendance" name="attendance" class="form-input" min="0"
+                                    max="100" step="0.01" placeholder="0-100" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quizzes -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3 class="form-card-title">Quiz Performance</h3>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="form-grid">
+                                <div class="form-group" id="quiz1-group">
+                                    <label for="quiz1" class="form-label">Quiz 1 <span class="total-marks"
+                                            id="quiz1-total">(out of 100)</span></label>
+                                    <input type="number" id="quiz1" name="quiz1" class="form-input" min="0" max="100"
+                                        step="0.01" placeholder="0-100" required>
+                                </div>
+                                <div class="form-group" id="quiz2-group">
+                                    <label for="quiz2" class="form-label">Quiz 2 <span class="total-marks"
+                                            id="quiz2-total">(out of 100)</span></label>
+                                    <input type="number" id="quiz2" name="quiz2" class="form-input" min="0" max="100"
+                                        step="0.01" placeholder="0-100" required>
+                                </div>
+                                <div class="form-group" id="quiz3-group">
+                                    <label for="quiz3" class="form-label">Quiz 3 <span class="total-marks"
+                                            id="quiz3-total">(out of 100)</span></label>
+                                    <input type="number" id="quiz3" name="quiz3" class="form-input" min="0" max="100"
+                                        step="0.01" placeholder="0-100" required>
+                                </div>
+                                <div class="form-group" id="quiz4-group">
+                                    <label for="quiz4" class="form-label">Quiz 4 <span class="total-marks"
+                                            id="quiz4-total">(out of 100)</span></label>
+                                    <input type="number" id="quiz4" name="quiz4" class="form-input" min="0" max="100"
+                                        step="0.01" placeholder="0-100" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Assignments -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3 class="form-card-title">Assignment Performance</h3>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="form-grid">
+                                <div class="form-group" id="assignment1-group">
+                                    <label for="assignment1" class="form-label">Assignment 1 <span class="total-marks"
+                                            id="assignment1-total">(out of 100)</span></label>
+                                    <input type="number" id="assignment1" name="assignment1" class="form-input" min="0"
+                                        max="100" step="0.01" placeholder="0-100" required>
+                                </div>
+                                <div class="form-group" id="assignment2-group">
+                                    <label for="assignment2" class="form-label">Assignment 2 <span class="total-marks"
+                                            id="assignment2-total">(out of 100)</span></label>
+                                    <input type="number" id="assignment2" name="assignment2" class="form-input" min="0"
+                                        max="100" step="0.01" placeholder="0-100" required>
+                                </div>
+                                <div class="form-group" id="assignment3-group">
+                                    <label for="assignment3" class="form-label">Assignment 3 <span class="total-marks"
+                                            id="assignment3-total">(out of 100)</span></label>
+                                    <input type="number" id="assignment3" name="assignment3" class="form-input" min="0"
+                                        max="100" step="0.01" placeholder="0-100" required>
+                                </div>
+                                <div class="form-group" id="assignment4-group">
+                                    <label for="assignment4" class="form-label">Assignment 4 <span class="total-marks"
+                                            id="assignment4-total">(out of 100)</span></label>
+                                    <input type="number" id="assignment4" name="assignment4" class="form-input" min="0"
+                                        max="100" step="0.01" placeholder="0-100" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Midterm -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3 class="form-card-title">Midterm Examination</h3>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="form-group-inline" id="midterm-group">
+                                <label for="midterm" class="form-label">
+                                    <span class="label-icon">📝</span>
+                                    <span>Midterm Score <span class="total-marks" id="midterm-total">(out of
+                                            100)</span></span>
+                                </label>
+                                <input type="number" id="midterm" name="midterm" class="form-input" min="0" max="100"
+                                    step="0.01" placeholder="0-100" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="submit-btn" id="predict-btn">
+                        <span class="btn-icon">🚀</span>
+                        <span class="btn-text">Generate Prediction</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Results Section -->
+            <section class="section" id="results-section" style="display: none;">
+                <div class="section-header">
+                    <h2 class="section-title">Prediction Results</h2>
+                    <p class="section-description">AI-powered analysis based on neural network models</p>
+                </div>
+
+                <div class="results-grid" id="results-container">
+                    <!-- Pass/Fail Card -->
+                    <div id="pass-fail-card" class="result-card">
+                        <div class="result-icon">🎯</div>
+                        <div class="result-title">Outcome</div>
+                        <div id="pass-fail-value" class="result-value">--</div>
+                        <div class="result-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Confidence</span>
+                                <span id="pass-fail-confidence" class="detail-value">--%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Probability</span>
+                                <span id="pass-probability" class="detail-value">--%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Score Card -->
+                    <div class="result-card">
+                        <div class="result-icon">📊</div>
+                        <div class="result-title">Projected Score</div>
+                        <div id="final-score-value" class="result-value">--</div>
+                        <div class="result-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Predicted Grade</span>
+                                <span id="final-grade" class="detail-value">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Support Card -->
+                    <div id="support-card" class="result-card">
+                        <div class="result-icon">💡</div>
+                        <div class="result-title">Support Needed</div>
+                        <div id="support-value" class="result-value">--</div>
+                        <div class="result-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Certainty</span>
+                                <span id="support-confidence" class="detail-value">--%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="recommendations-container">
+                    <!-- Assessment & Recommendation -->
+                    <div class="assessment-card">
+                        <h3 class="assessment-title">Analysis</h3>
+                        <p id="overall-assessment">--</p>
+                    </div>
+
+                    <div class="recommendation-card">
+                        <h3 class="recommendation-title">Recommendation</h3>
+                        <p id="recommendation">--</p>
+                    </div>
+
+                    <!-- Feature Analysis -->
+                    <div class="feature-analysis-card">
+                        <h3 class="assessment-title">Feature Analysis</h3>
+                        <p class="assessment-text" style="margin-bottom: 1rem;">Calculated features used by the <span
+                                id="model-name-display">selected</span> model (<span id="feature-count">0</span>
+                            features)</p>
+                        <div id="features-grid" class="features-grid">
+                            <!-- Features will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Error Section -->
+            <section class="section" id="error-section" style="display: none;">
+                <div class="error-card">
+                    <div class="error-icon">⚠️</div>
+                    <h3 class="error-title">Prediction Error</h3>
+                    <p class="error-message" id="error-message"></p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 Student Performance Analytics Platform | Powered by Neural Networks & Deep Learning</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
