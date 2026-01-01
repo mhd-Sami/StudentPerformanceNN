@@ -4,62 +4,114 @@
  */
 
 // API Configuration
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_URL = 'http://localhost:5000/api';
+const API_BASE_URL = API_URL; // Alias for backward compatibility
 
 // DOM Elements
 const form = document.getElementById('prediction-form');
-const submitBtn = document.getElementById('predict-btn');
 const resultsSection = document.getElementById('results-section');
 const errorSection = document.getElementById('error-section');
-const subjectSelect = document.getElementById('subject-select');
+const submitBtn = document.getElementById('predict-btn');
+const subjectSelect = document.getElementById('subject-select'); // Restored
 const modelSelect = document.getElementById('model-select');
-const modelStatus = document.getElementById('model-status');
+const modelStatus = document.getElementById('model-status'); // Restored
+const downloadBtn = document.getElementById('download-report-btn');
 
 // Current subject configuration
 let currentConfig = null;
 
-// Form submission handler
-form.addEventListener('submit', async (e) => {
+// State
+let lastPredictionData = null;
+
+// Event Listeners
+form.addEventListener('submit', handlePredictionSubmit);
+
+if (downloadBtn) {
+    downloadBtn.addEventListener('click', handleDownloadReport);
+}
+
+/**
+ * Handle prediction form submission
+ */
+async function handlePredictionSubmit(e) {
     e.preventDefault();
-
-    // Clear previous results
-    hideResults();
     hideError();
-
-    // Show loading state
+    hideResults();
     setLoading(true);
 
     try {
-        // Collect form data
         const formData = collectFormData();
 
-        // Make API request
-        const response = await fetch(`${API_BASE_URL}/predict`, {
+        const response = await fetch(`${API_URL}/predict`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(formData)
+            body: JSON.stringify(formData),
         });
 
         const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error(data.message || 'Prediction failed');
-        }
-        if (data.success) {
-            // Display results
+        if (response.ok && data.success) {
+            // Save data for report generation
+            lastPredictionData = {
+                predictions: data.predictions,
+                features: formData, // We use the input form data as features
+                comparison: data.comparison
+            };
+
             displayResults(data.predictions, data.comparison, data.debug_info);
+            showResults();
         } else {
-            showError(data.error || 'An error occurred during prediction.');
+            throw new Error(data.error || 'Prediction failed');
         }
     } catch (error) {
-        console.error('Error:', error);
         showError(error.message);
     } finally {
         setLoading(false);
     }
-});
+}
+
+/**
+ * Handle report download
+ */
+async function handleDownloadReport() {
+    if (!lastPredictionData) return;
+
+    const originalText = downloadBtn.innerHTML;
+    downloadBtn.innerHTML = '<span>⏳</span> Generating...';
+    downloadBtn.disabled = true;
+
+    try {
+        const response = await fetch(`${API_URL}/generate_report`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(lastPredictionData),
+        });
+
+        if (!response.ok) throw new Error("Report generation failed");
+
+        // Handle Blob download
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `student_report_${new Date().getTime()}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+
+    } catch (error) {
+        console.error("Download error:", error);
+        alert("Failed to generate report. Please try again.");
+    } finally {
+        downloadBtn.innerHTML = originalText;
+        downloadBtn.disabled = false;
+    }
+}
 
 /**
  * Collect form data
@@ -306,14 +358,24 @@ function hideError() {
  * Set loading state
  */
 function setLoading(isLoading) {
+    // Re-fetch button to ensure we have the element if it wasn't found initially
+    const btn = submitBtn || document.getElementById('predict-btn');
+
+    if (!btn) {
+        console.error("Critical: Toggle button not found in DOM");
+        return;
+    }
+
     if (isLoading) {
-        submitBtn.classList.add('loading');
-        submitBtn.disabled = true;
-        document.querySelector('.btn-text').textContent = 'Analyzing...';
+        btn.classList.add('loading');
+        btn.disabled = true;
+        const textSpan = btn.querySelector('.btn-text');
+        if (textSpan) textSpan.textContent = 'Analyzing...';
     } else {
-        submitBtn.classList.remove('loading');
-        submitBtn.disabled = false;
-        document.querySelector('.btn-text').textContent = 'Predict Performance';
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        const textSpan = btn.querySelector('.btn-text');
+        if (textSpan) textSpan.textContent = 'Predict Performance';
     }
 }
 

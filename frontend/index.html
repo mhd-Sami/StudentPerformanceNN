@@ -236,13 +236,20 @@
 
             <!-- Results Section -->
             <section class="section" id="results-section" style="display: none;">
-                <div class="section-header">
-                    <h2 class="section-title">Prediction Results</h2>
-                    <p class="section-description">AI-powered analysis based on neural network models</p>
+                <div class="header-content">
+                    <h2 class="section-title">Analysis Results</h2>
+                    <p class="section-description">AI-generated performance assessment</p>
                 </div>
 
-                <div class="results-grid" id="results-container">
-                    <!-- Pass/Fail Card -->
+                <div style="text-align: right; margin-bottom: 20px;">
+                    <button id="download-report-btn" class="btn btn-secondary"
+                        style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; padding: 0.5rem 1rem;">
+                        <span>📄</span> Download Full Report
+                    </button>
+                </div>
+
+                <div class="results-grid">
+                    <!-- Pass/Fail Prediction -->
                     <div id="pass-fail-card" class="result-card">
                         <div class="result-icon">🎯</div>
                         <div class="result-title">Outcome</div>
@@ -332,7 +339,7 @@
         </div>
     </footer>
 
-    <script src="script.js?v=2.3"></script>
+    <script src="script.js?v=2.8"></script>
 </body>
 
 </html>

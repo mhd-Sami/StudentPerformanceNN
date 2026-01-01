@@ -376,6 +376,33 @@ def delete_subject(config_id):
             'message': str(e)
         }), 500
 
+from flask import send_file
+from io import BytesIO
+from datetime import datetime
+
+@app.route('/api/generate_report', methods=['POST'])
+def generate_report():
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+            
+        from report_generator import generate_student_report
+        pdf_content = generate_student_report(data)
+        
+        return send_file(
+            BytesIO(pdf_content),
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=f"student_report_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
+        )
+            
+    except Exception as e:
+        print(f"Report generation error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     print("="*60)
@@ -386,7 +413,8 @@ if __name__ == '__main__':
     print("\nEndpoints:")
     print("  GET  /api/health  - Health check")
     print("  POST /api/predict - Make predictions")
+    print("  POST /api/generate_report - Download PDF report")
     print("  GET  /api/info    - API information")
     print("\n" + "="*60)
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, port=5000)
